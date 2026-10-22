@@ -17,9 +17,14 @@ export default function ClinicPage() {
   const [start, setStart] = useState(() => toLocalInput(nextHour()));
   const [duration, setDuration] = useState(30);
 
+  // const slotsQ = useQuery({
+  //   queryKey: ['slots', 'mine', user.id],
+  //   queryFn: () => endpoints.slots({ clinicId: user.id, availableOnly: 'false', limit: 100 }),
+  //   refetchInterval: 15_000,
+  // });
   const slotsQ = useQuery({
     queryKey: ['slots', 'mine', user.id],
-    queryFn: () => endpoints.slots({ clinicId: user.id, availableOnly: 'false', limit: 100 }),
+    queryFn: () => endpoints.mySlots({ limit: 100 }),
     refetchInterval: 15_000,
   });
 
@@ -108,10 +113,10 @@ export default function ClinicPage() {
             items={slots}
             getDate={(s) => s.starts_at}
             row={(s) => (
-              <li key={s.id} className={s.available ? 'row row-open' : 'row row-booked'}>
+              <li key={s.id} className={s.booking ? 'row row-booked' : 'row row-open'}>
                 <div className="row-time">{startTime(s.starts_at)}</div>
                 <div className="row-main">
-                  <strong>{s.available ? 'Open' : 'Booked'}</strong>
+                  <strong>{s.booking ? `Booked by ${s.booking.patient_name}` : 'Open'}</strong>
                   <span className="muted">{minutesBetween(s.starts_at, s.ends_at)} minutes</span>
                 </div>
                 <button
@@ -119,9 +124,9 @@ export default function ClinicPage() {
                   disabled={cancel.isPending}
                   onClick={() =>
                     window.confirm(
-                      s.available
-                        ? 'Cancel this time?'
-                        : 'This time is booked. Cancelling it also cancels the patient’s appointment. Continue?',
+                      s.booking
+                        ? `This time is booked by ${s.booking.patient_name}. Cancelling it also cancels their appointment. Continue?`
+                        : 'Cancel this time?',
                     ) && cancel.mutate(s.id)
                   }
                 >

@@ -1,6 +1,7 @@
 import request from 'supertest';
 import { describe, it, expect } from 'vitest';
 import app from '../src/app.js';
+import { pool } from '../src/config/db.js';
 
 const valid = { email: 'Jane@Clinic.com', password: 'supersecret1', name: 'Jane', role: 'patient' };
 
@@ -54,5 +55,43 @@ describe('auth', () => {
 
     expect(res.status).toBe(400);
     expect(res.body.error.code).toBe('INVALID_JSON');
+  });
+    it('does not let a clinic reuse an email already used by a patient', async () => {
+    await request(app).post('/api/v1/auth/register').send(valid);
+    const res = await request(app)
+      .post('/api/v1/auth/register')
+      .send({ ...valid, name: 'Jane Clinic', role: 'clinic' });
+
+    expect(res.status).toBe(409);
+    expect(res.body.error.code).toBe('EMAIL_TAKEN');
+  });
+
+  it('treats emails that differ only by case or spaces as the same email', async () => {
+    await request(app).post('/api/v1/auth/register').send(valid);
+    const res = await request(app)
+      .post('/api/v1/auth/register')
+      .send({ ...valid, email: '  JANE@CLINIC.COM ' });
+
+    expect(res.status).toBe(409);
+    expect(res.body.error.code).toBe('EMAIL_TAKEN');
+  });
+
+  it('enforces case-insensitive uniqueness in the database itself', async () => {
+    await pool.query(
+      `INSERT INTO users (email, password_hash, role, name) VALUES ('a@b.com','x','patient','A')`);
+
+    await expect(
+      pool.query(
+        `INSERT INTO users (email, password_hash, role, name) VALUES ('A@B.com','x','clinic','B')`),
+    ).rejects.toMatchObject({ code: '23505' });
+  });
+
+  it('lets only one of several simultaneous registrations with one email succeed', async () => {
+    const results = await Promise.all(
+      Array.from({ length: 5 }, () => request(app).post('/api/v1/auth/register').send(valid)),
+    );
+
+    expect(results.filter((r) => r.status === 201)).toHaveLength(1);
+    expect(results.filter((r) => r.status === 409)).toHaveLength(4);
   });
 });

@@ -9,6 +9,10 @@ export const authController = {
     try { res.json(await authService.login(req.body)); }
     catch (e) { next(e); }
   },
+  listClinics: async (_req, res, next) => {
+    try { res.json(await authService.listClinics()); }
+    catch (e) { next(e); }
+  },
   me: async (req, res, next) => {
     try { res.json(await authService.me(req.user.id)); }
     catch (e) { next(e); }

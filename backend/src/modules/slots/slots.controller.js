@@ -9,6 +9,10 @@ export const slotsController = {
     try { res.json(await slotsService.list(req.query)); }
     catch (e) { next(e); }
   },
+  listMine: async (req, res, next) => {
+    try { res.json(await slotsService.listForClinic(req.user.id, req.query)); }
+    catch (e) { next(e); }
+  },
   cancel: async (req, res, next) => {
     try {
       await slotsService.cancel(req.user.id, req.params.id);

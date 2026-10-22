@@ -35,6 +35,8 @@ export const authService = {
     return { user, token: signToken(user) };
   },
 
+  listClinics: () => authRepo.listClinics(pool),
+
   async me(userId) {
     const user = await authRepo.findById(pool, userId);
     if (!user) throw NotFound('User');

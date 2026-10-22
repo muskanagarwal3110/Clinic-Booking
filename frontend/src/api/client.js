@@ -32,7 +32,9 @@ api.interceptors.response.use(
 );
 
 export const endpoints = {
+  clinics: () => api.get('/auth/clinics').then((r) => r.data),
   slots: (params) => api.get('/slots', { params }).then((r) => r.data),
+  mySlots: (params) => api.get('/slots/mine', { params }).then((r) => r.data),
   createSlot: (body) => api.post('/slots', body).then((r) => r.data),
   cancelSlot: (id) => api.delete(`/slots/${id}`),
   book: (slotId) => api.post('/bookings', { slotId }).then((r) => r.data),

@@ -12,6 +12,11 @@ export const authRepo = {
     const { rows } = await db.query(`SELECT * FROM users WHERE email = $1`, [email]);
     return rows[0];
   },
+  async listClinics(db) {
+    const { rows } = await db.query(
+      `SELECT id, name FROM users WHERE role = 'clinic' ORDER BY lower(name), id`);
+    return rows;
+  },
   async findById(db, id) {
     const { rows } = await db.query(`SELECT ${PUBLIC} FROM users WHERE id = $1`, [id]);
     return rows[0];

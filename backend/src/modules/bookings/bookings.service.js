@@ -26,7 +26,7 @@ export const bookingsService = {
     withTransaction(async (tx) => {
       const booking = await bookingsRepo.findByIdForUpdate(tx, bookingId);
       if (!booking) throw NotFound('Booking');
-      if (booking.patient_id !== patientId) throw Forbidden('This is not your booking');
+      if (String(booking.patient_id) !== String(patientId)) throw Forbidden('This is not your booking');
       if (booking.status === 'cancelled')
         throw Conflict('BOOKING_ALREADY_CANCELLED', 'Booking is already cancelled');
       return bookingsRepo.markCancelled(tx, bookingId);

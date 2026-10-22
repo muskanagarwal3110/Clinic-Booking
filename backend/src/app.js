@@ -5,7 +5,7 @@ import pinoHttp from 'pino-http';
 import { env } from './config/env.js';
 import { logger } from './config/logger.js';
 import { pool } from './config/db.js';
-import { globalLimiter, authLimiter } from './middleware/rateLimit.js';
+import { globalLimiter } from './middleware/rateLimit.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 import authRoutes from './modules/auth/auth.routes.js';
 import slotsRoutes from './modules/slots/slots.routes.js';
@@ -30,9 +30,10 @@ app.get('/ready', async (_req, res) => {
 });
 
 app.use('/api/v1', globalLimiter);
-app.use('/api/v1/auth', authLimiter, authRoutes);
+app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/slots', slotsRoutes);
 app.use('/api/v1/bookings', bookingsRoutes);
+
 
 app.use(notFoundHandler);
 app.use(errorHandler);
