@@ -1,7 +1,6 @@
 import request from 'supertest';
 import { describe, it, expect } from 'vitest';
 import app from '../src/app.js';
-import { pool } from '../src/config/db.js';
 
 const valid = { email: 'Jane@Clinic.com', password: 'supersecret1', name: 'Jane', role: 'patient' };
 
