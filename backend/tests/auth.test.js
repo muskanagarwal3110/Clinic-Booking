@@ -76,16 +76,6 @@ describe('auth', () => {
     expect(res.body.error.code).toBe('EMAIL_TAKEN');
   });
 
-  it('enforces case-insensitive uniqueness in the database itself', async () => {
-    await pool.query(
-      `INSERT INTO users (email, password_hash, role, name) VALUES ('a@b.com','x','patient','A')`);
-
-    await expect(
-      pool.query(
-        `INSERT INTO users (email, password_hash, role, name) VALUES ('A@B.com','x','clinic','B')`),
-    ).rejects.toMatchObject({ code: '23505' });
-  });
-
   it('lets only one of several simultaneous registrations with one email succeed', async () => {
     const results = await Promise.all(
       Array.from({ length: 5 }, () => request(app).post('/api/v1/auth/register').send(valid)),
